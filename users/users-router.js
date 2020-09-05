@@ -6,7 +6,7 @@ const restrict = require("../middleware/restrict");
 
 const router = express.Router();
 
-router.get("/api/users", restrict("finance"), async (req, res, next) => {
+router.get("/api/users", restrict("hr"), async (req, res, next) => {
   try {
     res.json(await Users.find());
   } catch (err) {
@@ -31,7 +31,7 @@ router.post("/api/register", async (req, res, next) => {
     const newUser = await Users.add({
       username,
       password: await bcrypt.hash(password, 14),
-      department
+      department,
     });
 
     res.status(201).json(newUser);
@@ -46,7 +46,8 @@ router.post("/api/register", async (req, res, next) => {
 router.post("/api/login", async (req, res, next) => {
   try {
     const { username, password } = req.body;
-    const user = await Users.findBy({ username }).first();
+    const user = await Users.findBy({ username }).first()
+
 
     if (!user) {
       return res.status(401).json({
@@ -64,7 +65,7 @@ router.post("/api/login", async (req, res, next) => {
     const token = jwt.sign(
       {
         userID: user.id,
-        username: user.username, 
+        // username: user.username, 
         department: user.department,
       },
       process.env.JWT_SECRET
@@ -80,5 +81,21 @@ router.post("/api/login", async (req, res, next) => {
   }
 });
 
+router.get("/logout", async (req, res, next) => {
+  try {
+    // this will delete the session in the database and try to expire the cookie,
+    // though it's ultimately up to the client if they delete the cookie or not.
+    // but it becomes useless to them once the session is deleted server-side.
+    req.session.destroy((err) => {
+      if (err) {
+        next(err);
+      } else {
+        res.status(204).end();
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
-module.exports = router
+module.exports = router;

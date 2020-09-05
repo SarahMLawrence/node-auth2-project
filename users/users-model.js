@@ -6,17 +6,17 @@ async function add(user) {
 }
 
 function find() {
-  return db("users").select("id", "username");
+  return db("users").select("id", "username", "department");
 }
 
 function findBy(filter) {
-  return db("users")
+    return db('users')
     .select("id", "username", "password", "department")
-    .where(filter);
+    .where(filter).first();
 }
 
 function findById(id) {
-  return db("users").select("id", "username").where({ id }).first();
+  return db("users").where({ id }).first();
 }
 
 module.exports = {
