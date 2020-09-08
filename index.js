@@ -5,32 +5,25 @@ const express = require("express");
 require("dotenv").config()
 const helmet = require("helmet");
 const cors = require("cors");
-// const session = require("express-session");
-// const KnexSessionStore = require("connect-session-knex")(session);
+const session = require("express-session")
 const cookieParser = require("cookie-parser");
 const userRouter = require("./users/users-router");
 
 const server = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 5000;
 
 server.use(helmet());
 server.use(cors());
 server.use(express.json());
-// server.use(
-//   session({
-//     resave: false,
-//     saveUninitialized: false,
-//     secret: "keep it safe",
-//     store: new KnexSessionStore({
-//       knex: db,
-//       createtable: true,
-//     }),
-//   })
-// );
-
+server.use(session({
+	resave: false, // avoid recreating sessions that have not changed
+	saveUninitialized: false, // comply with GDPR laws for setting cookies automatically
+	secret: "keep it secret, keep it safe", // cryptographically sign the cookie
+}))
 server.use(cookieParser());
 
 server.use(userRouter);
+
 server.use((err, req, res, next) => {
   console.log(err);
   res.status(500).json({
